@@ -1,0 +1,125 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.16">
+  <TextList Name="TextList_State2" Id="{de3cbfd6-428a-4c1f-b6f0-481d00e8f87a}">
+    <XmlArchive>
+      <Data>
+        <o xml:space="preserve" t="TextListObject">
+          <v n="UniqueIdGenerator">"0"</v>
+          <l n="TextList" t="ArrayList" cet="TextListRow">
+            <o>
+              <v n="TextID">"0"</v>
+              <v n="TextDefault">"Wait for Door Open.."</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"10"</v>
+              <v n="TextDefault">"Wait For Part 1 Load and Cycle Start..."</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"20"</v>
+              <v n="TextDefault">"Door Closing..."</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"30"</v>
+              <v n="TextDefault">"Clamp CC1 CC3 CC5 Closing..."</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"40"</v>
+              <v n="TextDefault">"Trunmion is Moving 0 to 50 Degree for Load 2"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"50"</v>
+              <v n="TextDefault">"Door Opening..."</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"60"</v>
+              <v n="TextDefault">"Wait For Part 2 Load and Cycle Start..."</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"70"</v>
+              <v n="TextDefault">"Clamp CC2 CC4 CC6 Closing.."</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"80"</v>
+              <v n="TextDefault">"Door Closing..."</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"90"</v>
+              <v n="TextDefault">"Trunmion is Moving 50 to 0 Degree..."</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"100"</v>
+              <v n="TextDefault">"Turn Table Moving 0 to 180 Degree for weld Position..."</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"110"</v>
+              <v n="TextDefault">"Robot Start....Waiting for Weld Complete 1...."</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"120"</v>
+              <v n="TextDefault">"Trunmion is Moving 0 to 50 Degree for Weld 2..."</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"130"</v>
+              <v n="TextDefault">"Robot Start....Waiting for Weld Complete 2...."</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"140"</v>
+              <v n="TextDefault">"Clamp CC1 CC3 CC5 Opening..."</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"150"</v>
+              <v n="TextDefault">"Robot Clear To Pick....Waiting for Pick Complete 1...."</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"160"</v>
+              <v n="TextDefault">"Trunmion is Moving 0 Degree for Pick 2..."</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"170"</v>
+              <v n="TextDefault">"Clamp CC2 CC4 CC6 Opening..."</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"180"</v>
+              <v n="TextDefault">"Robot Clear To Pick....Waiting for Pick Complete 2...."</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">""</v>
+              <v n="TextDefault">""</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+          </l>
+          <l n="Languages" t="ArrayList" />
+          <v n="GuidInit">{8911c953-ceae-4d63-ae4c-15b877b9d6c1}</v>
+          <v n="GuidReInit">{cf91c08d-0d7c-47ff-ae3f-96e9695bec51}</v>
+          <v n="GuidExitX">{b3ac42b9-f56e-4985-b3ee-098f4d75a659}</v>
+        </o>
+      </Data>
+      <TypeList>
+        <Type n="ArrayList">System.Collections.ArrayList</Type>
+        <Type n="Guid">System.Guid</Type>
+        <Type n="String">System.String</Type>
+        <Type n="TextListObject">{2bef0454-1bd3-412a-ac2c-af0f31dbc40f}</Type>
+        <Type n="TextListRow">{53da1be7-ad25-47c3-b0e8-e26286dad2e0}</Type>
+      </TypeList>
+    </XmlArchive>
+  </TextList>
+</TcPlcObject>

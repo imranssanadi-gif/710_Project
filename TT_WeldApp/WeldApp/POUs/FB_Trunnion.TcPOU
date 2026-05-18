@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.16">
+  <POU Name="FB_Trunnion" Id="{35e586cd-fb4b-4abd-948f-0b6bbbbaeebd}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Trunnion
+VAR_INPUT
+    To0  : BOOL;
+    To50 : BOOL;
+END_VAR
+
+VAR_OUTPUT
+    CmdTo0  : BOOL;
+    CmdTo50 : BOOL;
+    Busy    : BOOL;
+    At0     : BOOL;
+    At50    : BOOL;
+END_VAR
+
+VAR
+    State : INT := 0;
+    tMove : TON;
+END_VAR
+
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[CASE State OF
+
+0:
+    Busy := FALSE;
+    CmdTo0 := FALSE;
+    CmdTo50 := FALSE;
+    At0 := TRUE;
+    At50 := FALSE;
+    tMove(IN := FALSE);
+
+    IF To50 THEN State := 10;
+    END_IF
+
+10:
+    Busy := TRUE;
+    CmdTo50 := TRUE;
+    At0 := FALSE;
+
+    tMove(IN := TRUE, PT := T#5s);
+
+    IF tMove.Q THEN
+        CmdTo50 := FALSE;
+        Busy := FALSE;
+        At50 := TRUE;
+        tMove(IN := FALSE);
+        State := 20;
+    END_IF
+
+20:
+    At50 := TRUE;
+
+    IF To0 THEN State := 30;
+    END_IF
+
+30:
+    Busy := TRUE;
+    CmdTo0 := TRUE;
+    At50 := FALSE;
+
+    tMove(IN := TRUE, PT := T#5s);
+
+    IF tMove.Q THEN
+        CmdTo0 := FALSE;
+        Busy := FALSE;
+        At0 := TRUE;
+        tMove(IN := FALSE);
+        State := 0;
+    END_IF
+
+END_CASE]]></ST>
+    </Implementation>
+    <LineIds Name="FB_Trunnion">
+      <LineId Id="470" Count="48" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

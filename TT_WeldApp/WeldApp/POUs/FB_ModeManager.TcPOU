@@ -1,0 +1,91 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.16">
+  <POU Name="FB_ModeManager" Id="{a398b737-177b-48d9-9c2c-87fccd230ede}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_ModeManager
+VAR_INPUT
+    AutoReq      : BOOL;   // Request Auto mode (HMI)
+    ManualReq    : BOOL;   // Request Manual mode (HMI)
+
+    SafetyOK     : BOOL;   // From safety logic
+    SystemIdle   : BOOL;   // TRUE when machine is safe (no motion)
+END_VAR
+
+VAR_OUTPUT
+    AutoMode     : BOOL;
+    ManualMode   : BOOL;
+
+    ModeActive   : BOOL;   // Any mode active
+END_VAR
+
+VAR
+    State : INT := 0;
+
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[CASE State OF
+
+//--------------------------------------------------
+// 0: NO MODE SELECTED
+//--------------------------------------------------
+0:
+    AutoMode := FALSE;
+    ManualMode := FALSE;
+    ModeActive := FALSE;
+
+    // Select Manual first (safe default)
+    IF ManualReq AND SafetyOK THEN
+        State := 20;
+
+    ELSIF AutoReq AND SafetyOK THEN
+        State := 10;
+    END_IF
+
+
+//--------------------------------------------------
+// 10: AUTO MODE ACTIVE
+//--------------------------------------------------
+10:
+    AutoMode := TRUE;
+    ManualMode := FALSE;
+    ModeActive := TRUE;
+
+    // Switch to Manual only when safe
+    IF ManualReq AND SystemIdle AND SafetyOK THEN
+        State := 20;
+    END_IF
+
+    // Drop mode if safety lost
+    IF NOT SafetyOK THEN
+        State := 0;
+    END_IF
+
+
+//--------------------------------------------------
+// 20: MANUAL MODE ACTIVE
+//--------------------------------------------------
+20:
+    AutoMode := FALSE;
+    ManualMode := TRUE;
+    ModeActive := TRUE;
+
+    // Switch to Auto only when safe
+    IF AutoReq AND SystemIdle AND SafetyOK THEN
+	   State := 10;
+    END_IF
+
+    // Drop mode if safety lost
+    IF NOT SafetyOK THEN
+        State := 0;
+    END_IF
+
+END_CASE]]></ST>
+    </Implementation>
+    <LineIds Name="FB_ModeManager">
+      <LineId Id="145" Count="14" />
+      <LineId Id="161" Count="33" />
+      <LineId Id="199" Count="6" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

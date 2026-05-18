@@ -1,0 +1,481 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.16">
+  <POU Name="MAIN" Id="{d2d5e1f4-2147-4e9c-8c27-c31d0fe3ebe9}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN
+VAR
+    //=================================================
+    // FB INSTANCES
+    //=================================================
+    ModeMgr    : FB_ModeManager;
+    AutoSeq    : FB_AutoSequence;
+	
+	Fixture_1_CC1     : FB_Clamp;
+    Fixture_1_CC2     : FB_Clamp;
+	Fixture_1_CC3     : FB_Clamp;
+    Fixture_1_CC4     : FB_Clamp;
+	Fixture_1_CC5     : FB_Clamp;
+	Fixture_1_CC6     : FB_Clamp;
+	
+	Fixture_2_CC1     : FB_Clamp;
+    Fixture_2_CC2     : FB_Clamp;
+	Fixture_2_CC3     : FB_Clamp;
+    Fixture_2_CC4     : FB_Clamp;
+	Fixture_2_CC5     : FB_Clamp;
+	Fixture_2_CC6     : FB_Clamp;
+	
+	RollerDoor1     : FB_RollerDoor;
+	RollerDoor2     : FB_RollerDoor;
+	
+    Trunnion1   : FB_Trunnion;
+	Trunnion2   : FB_Trunnion;
+	
+    Turntable   : FB_Turntable;
+
+    Robot1      : FB_Robot;
+	Robot2      : FB_Robot_MH;
+
+    //=================================================
+    // HMI INPUTS
+    //=================================================
+    CycleStart   : BOOL;
+
+    HMI_Auto     : BOOL;
+    HMI_Manual   : BOOL;
+
+    PartPresent1 : BOOL;
+    PartPresent2 : BOOL;
+	
+	PartPresent3 : BOOL;
+    PartPresent4 : BOOL;
+	
+    EmergencyStop   : BOOL;   // TRUE = OK
+    LightCurtainOK  : BOOL;   // TRUE = OK
+
+    //---------------- Manual Controls ----------------
+    Fixture_1_ManCC1Close : BOOL;
+    Fixture_1_ManCC1Open  : BOOL;
+
+    Fixture_1_ManCC2Close : BOOL;
+    Fixture_1_ManCC2Open  : BOOL;
+	
+	Fixture_1_ManCC3Close : BOOL;
+    Fixture_1_ManCC3Open  : BOOL;
+
+    Fixture_1_ManCC4Close : BOOL;
+    Fixture_1_ManCC4Open  : BOOL;
+	
+	Fixture_1_ManCC5Close : BOOL;
+    Fixture_1_ManCC5Open  : BOOL;
+	
+	Fixture_1_ManCC6Close : BOOL;
+    Fixture_1_ManCC6Open  : BOOL;
+
+	Fixture_2_ManCC1Close : BOOL;
+    Fixture_2_ManCC1Open  : BOOL;
+
+    Fixture_2_ManCC2Close : BOOL;
+    Fixture_2_ManCC2Open  : BOOL;
+	
+	Fixture_2_ManCC3Close : BOOL;
+    Fixture_2_ManCC3Open  : BOOL;
+
+    Fixture_2_ManCC4Close : BOOL;
+    Fixture_2_ManCC4Open  : BOOL;
+	
+	Fixture_2_ManCC5Close : BOOL;
+    Fixture_2_ManCC5Open  : BOOL;
+	
+	Fixture_2_ManCC6Close : BOOL;
+    Fixture_2_ManCC6Open  : BOOL;	
+	
+    ManRollerDoor1Close : BOOL;
+    ManRollerDoor1Open  : BOOL;	
+	
+    ManRollerDoor2Close : BOOL;
+    ManRollerDoor2Open  : BOOL;	
+
+    ManTrn10        : BOOL;
+    ManTrn150       : BOOL;
+	
+    ManTrn20        : BOOL;
+    ManTrn250       : BOOL;	
+
+    ManTT0         : BOOL;
+    ManTT180       : BOOL;
+
+    ManWeld1       : BOOL;
+    ManWeld2       : BOOL;
+
+    //=================================================
+    // INTERNAL SIGNALS
+    //=================================================
+    SafetyOK   : BOOL;
+    SystemIdle : BOOL;
+
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[SafetyOK := EmergencyStop AND LightCurtainOK;
+
+SystemIdle :=
+    NOT Trunnion1.Busy AND
+	NOT Trunnion2.Busy AND
+    NOT Turntable.Busy AND
+    NOT Robot1.Busy AND
+	NOT Robot2.Busy AND
+    NOT Fixture_1_CC1.Busy AND
+    NOT Fixture_1_CC2.Busy AND 
+	NOT Fixture_1_CC3.Busy AND
+    NOT Fixture_1_CC4.Busy AND 
+    NOT Fixture_1_CC5.Busy AND
+    NOT Fixture_1_CC6.Busy AND
+	NOT Fixture_2_CC1.Busy AND
+    NOT Fixture_2_CC2.Busy AND 
+	NOT Fixture_2_CC3.Busy AND
+    NOT Fixture_2_CC4.Busy AND 
+    NOT Fixture_2_CC5.Busy AND
+    NOT Fixture_2_CC6.Busy;
+	
+ModeMgr(
+    AutoReq    := HMI_Auto,
+    ManualReq  := HMI_Manual,
+    SafetyOK   := SafetyOK,
+    SystemIdle := SystemIdle
+);
+
+//Fixture 1
+//--------------------------------------------------
+// CC1 CONTROL
+//--------------------------------------------------
+Fixture_1_CC1(
+    CloseCmd := ((AutoSeq.Fixture_1_CC1_CloseCmd AND ModeMgr.AutoMode) OR (Fixture_1_ManCC1Close AND ModeMgr.ManualMode)) AND SafetyOK,
+    OpenCmd  := ((AutoSeq.Fixture_1_CC1_OpenCmd AND ModeMgr.AutoMode) OR (Fixture_1_ManCC1Open AND ModeMgr.ManualMode)) AND SafetyOK
+);
+	IO.Fixture1Input.i_CC1_Clamp_1_Sensor_WP:= Fixture_1_CC1.ClosedSim; 
+	IO.Fixture1Input.i_CC1_Clamp_2_Sensor_WP:= Fixture_1_CC1.ClosedSim;
+	IO.Fixture1Input.i_CC1_Clamp_3_Sensor_WP:= Fixture_1_CC1.ClosedSim;
+
+//--------------------------------------------------
+// CC2 CONTROL
+//--------------------------------------------------
+Fixture_1_CC2(
+    CloseCmd := ((AutoSeq.Fixture_1_CC2_CloseCmd AND ModeMgr.AutoMode) OR (Fixture_1_ManCC2Close AND ModeMgr.ManualMode)) AND SafetyOK,
+    OpenCmd  := ((AutoSeq.Fixture_1_CC2_OpenCmd AND ModeMgr.AutoMode) OR (Fixture_1_ManCC2Open AND ModeMgr.ManualMode)) AND SafetyOK
+);
+	IO.Fixture1Input.i_CC2_Clamp_1_Sensor_WP:= Fixture_1_CC2.ClosedSim;
+ 	IO.Fixture1Input.i_CC2_Clamp_2_Sensor_WP:= Fixture_1_CC2.ClosedSim; 
+	IO.Fixture1Input.i_CC2_Clamp_3_Sensor_WP:= Fixture_1_CC2.ClosedSim;
+
+//--------------------------------------------------
+// CC3 CONTROL
+//--------------------------------------------------
+Fixture_1_CC3(
+    CloseCmd := ((AutoSeq.Fixture_1_CC3_CloseCmd AND ModeMgr.AutoMode) OR (Fixture_1_ManCC3Close AND ModeMgr.ManualMode)) AND SafetyOK,
+    OpenCmd  := ((AutoSeq.Fixture_1_CC3_OpenCmd AND ModeMgr.AutoMode) OR (Fixture_1_ManCC3Open AND ModeMgr.ManualMode)) AND SafetyOK
+);
+	IO.Fixture1Input.i_CC3_Clamp_1_Sensor_WP:= Fixture_1_CC3.ClosedSim;
+	IO.Fixture1Input.i_CC3_Clamp_2_Sensor_WP:= Fixture_1_CC3.ClosedSim;
+	IO.Fixture1Input.i_CC3_Clamp_3_Sensor_WP:= Fixture_1_CC3.ClosedSim;
+
+//--------------------------------------------------
+// CC4 CONTROL
+//--------------------------------------------------
+Fixture_1_CC4(
+    CloseCmd := ((AutoSeq.Fixture_1_CC4_CloseCmd AND ModeMgr.AutoMode) OR (Fixture_1_ManCC4Close AND ModeMgr.ManualMode)) AND SafetyOK,
+    OpenCmd  := ((AutoSeq.Fixture_1_CC4_OpenCmd AND ModeMgr.AutoMode) OR (Fixture_1_ManCC4Open AND ModeMgr.ManualMode)) AND SafetyOK
+);
+	IO.Fixture1Input.i_CC4_Clamp_1_Sensor_WP:= Fixture_1_CC4.ClosedSim;
+	IO.Fixture1Input.i_CC4_Clamp_2_Sensor_WP:= Fixture_1_CC4.ClosedSim;
+	IO.Fixture1Input.i_CC4_Clamp_3_Sensor_WP:= Fixture_1_CC4.ClosedSim;
+
+//--------------------------------------------------
+// CC5 CONTROL
+//--------------------------------------------------
+Fixture_1_CC5(
+    CloseCmd := ((AutoSeq.Fixture_1_CC5_CloseCmd AND ModeMgr.AutoMode) OR (Fixture_1_ManCC5Close AND ModeMgr.ManualMode)) AND SafetyOK,
+    OpenCmd  := ((AutoSeq.Fixture_1_CC5_OpenCmd AND ModeMgr.AutoMode) OR (Fixture_1_ManCC5Open AND ModeMgr.ManualMode)) AND SafetyOK
+);
+    IO.Fixture1Input.i_CC5_Clamp_1_Sensor_WP:= Fixture_1_CC5.ClosedSim;
+
+//--------------------------------------------------
+// CC6 CONTROL
+//--------------------------------------------------
+Fixture_1_CC6(
+    CloseCmd := ((AutoSeq.Fixture_1_CC6_CloseCmd AND ModeMgr.AutoMode) OR (Fixture_1_ManCC6Close AND ModeMgr.ManualMode)) AND SafetyOK,
+    OpenCmd  := ((AutoSeq.Fixture_1_CC6_OpenCmd AND ModeMgr.AutoMode) OR (Fixture_1_ManCC6Open AND ModeMgr.ManualMode)) AND SafetyOK
+);
+	IO.Fixture1Input.i_CC6_Clamp_1_Sensor_WP:= Fixture_1_CC6.ClosedSim;
+	
+//Fixture 2
+//--------------------------------------------------
+// CC1 CONTROL
+//--------------------------------------------------
+Fixture_2_CC1(
+    CloseCmd := ((AutoSeq.Fixture_2_CC1_CloseCmd AND ModeMgr.AutoMode) OR (Fixture_2_ManCC1Close AND ModeMgr.ManualMode)) AND SafetyOK,
+    OpenCmd  := ((AutoSeq.Fixture_2_CC1_OpenCmd AND ModeMgr.AutoMode) OR (Fixture_2_ManCC1Open AND ModeMgr.ManualMode)) AND SafetyOK
+);
+	IO.Fixture2Input.i_CC1_Clamp_1_Sensor_WP:= Fixture_2_CC1.ClosedSim;
+	IO.Fixture2Input.i_CC1_Clamp_2_Sensor_WP:= Fixture_2_CC1.ClosedSim;
+	IO.Fixture2Input.i_CC1_Clamp_3_Sensor_WP:= Fixture_2_CC1.ClosedSim;
+	
+//--------------------------------------------------
+// CC2 CONTROL
+//--------------------------------------------------
+Fixture_2_CC2(
+    CloseCmd := ((AutoSeq.Fixture_2_CC2_CloseCmd AND ModeMgr.AutoMode) OR (Fixture_2_ManCC2Close AND ModeMgr.ManualMode)) AND SafetyOK,
+    OpenCmd  := ((AutoSeq.Fixture_2_CC2_OpenCmd AND ModeMgr.AutoMode) OR (Fixture_2_ManCC2Open AND ModeMgr.ManualMode)) AND SafetyOK
+);
+	IO.Fixture2Input.i_CC2_Clamp_1_Sensor_WP:= Fixture_2_CC2.ClosedSim;
+	IO.Fixture2Input.i_CC2_Clamp_2_Sensor_WP:= Fixture_2_CC2.ClosedSim;
+	IO.Fixture2Input.i_CC2_Clamp_3_Sensor_WP:= Fixture_2_CC2.ClosedSim;
+
+//--------------------------------------------------
+// CC3 CONTROL
+//--------------------------------------------------
+Fixture_2_CC3(
+    CloseCmd := ((AutoSeq.Fixture_2_CC3_CloseCmd AND ModeMgr.AutoMode) OR (Fixture_2_ManCC3Close AND ModeMgr.ManualMode)) AND SafetyOK,
+    OpenCmd  := ((AutoSeq.Fixture_2_CC3_OpenCmd AND ModeMgr.AutoMode) OR (Fixture_2_ManCC3Open AND ModeMgr.ManualMode)) AND SafetyOK
+);
+	IO.Fixture2Input.i_CC3_Clamp_1_Sensor_WP:= Fixture_2_CC3.ClosedSim;
+	IO.Fixture2Input.i_CC3_Clamp_2_Sensor_WP:= Fixture_2_CC3.ClosedSim;
+	IO.Fixture2Input.i_CC3_Clamp_3_Sensor_WP:= Fixture_2_CC3.ClosedSim;
+ 
+//--------------------------------------------------
+// CC4 CONTROL
+//--------------------------------------------------
+Fixture_2_CC4(
+    CloseCmd := ((AutoSeq.Fixture_2_CC4_CloseCmd AND ModeMgr.AutoMode) OR (Fixture_2_ManCC4Close AND ModeMgr.ManualMode)) AND SafetyOK,
+    OpenCmd  := ((AutoSeq.Fixture_2_CC4_OpenCmd AND ModeMgr.AutoMode) OR (Fixture_2_ManCC4Open AND ModeMgr.ManualMode)) AND SafetyOK
+);
+	IO.Fixture2Input.i_CC4_Clamp_1_Sensor_WP := Fixture_2_CC4.ClosedSim;
+	IO.Fixture2Input.i_CC4_Clamp_2_Sensor_WP := Fixture_2_CC4.ClosedSim;
+	IO.Fixture2Input.i_CC4_Clamp_3_Sensor_WP := Fixture_2_CC4.ClosedSim;
+
+//--------------------------------------------------
+// CC5 CONTROL
+//--------------------------------------------------
+Fixture_2_CC5(
+    CloseCmd := ((AutoSeq.Fixture_2_CC5_CloseCmd AND ModeMgr.AutoMode) OR (Fixture_2_ManCC5Close AND ModeMgr.ManualMode)) AND SafetyOK,
+    OpenCmd  := ((AutoSeq.Fixture_2_CC5_OpenCmd AND ModeMgr.AutoMode) OR (Fixture_2_ManCC5Open AND ModeMgr.ManualMode)) AND SafetyOK
+);
+	IO.Fixture2Input.i_CC5_Clamp_1_Sensor_WP:= Fixture_2_CC5.ClosedSim;
+
+//--------------------------------------------------
+// CC6 CONTROL
+//--------------------------------------------------
+Fixture_2_CC6(
+    CloseCmd := ((AutoSeq.Fixture_2_CC6_CloseCmd AND ModeMgr.AutoMode) OR (Fixture_2_ManCC6Close AND ModeMgr.ManualMode)) AND SafetyOK,
+    OpenCmd  := ((AutoSeq.Fixture_2_CC6_OpenCmd AND ModeMgr.AutoMode) OR (Fixture_2_ManCC6Open AND ModeMgr.ManualMode)) AND SafetyOK
+);
+	IO.Fixture2Input.i_CC6_Clamp_1_Sensor_WP:= Fixture_2_CC6.ClosedSim;	
+
+//--------------------------------------------------
+// ROLLER DOOR CONTROL
+//--------------------------------------------------
+RollerDoor1(
+    CloseCmd := ((AutoSeq.RollerDoor1CloseCmd AND ModeMgr.AutoMode) OR (ManRollerDoor1Close AND ModeMgr.ManualMode)) AND SafetyOK,
+    OpenCmd  := ((AutoSeq.RollerDoor1OpenCmd AND ModeMgr.AutoMode) OR (ManRollerDoor1Open AND ModeMgr.ManualMode)) AND SafetyOK
+);
+
+RollerDoor2(
+    CloseCmd := ((AutoSeq.RollerDoor2CloseCmd AND ModeMgr.AutoMode) OR (ManRollerDoor2Close AND ModeMgr.ManualMode)) AND SafetyOK,
+    OpenCmd  := ((AutoSeq.RollerDoor2OpenCmd AND ModeMgr.AutoMode) OR (ManRollerDoor2Open AND ModeMgr.ManualMode)) AND SafetyOK
+);
+
+//--------------------------------------------------
+// TRUNNION CONTROL
+//--------------------------------------------------
+Trunnion1(
+    To0  := ((AutoSeq.Trunnion1To0 AND ModeMgr.AutoMode) OR (ManTrn10 AND ModeMgr.ManualMode)) AND SafetyOK,
+    To50 := ((AutoSeq.Trunnion1To50 AND ModeMgr.AutoMode) OR (ManTrn150 AND ModeMgr.ManualMode)) AND SafetyOK
+);
+
+Trunnion2(
+    To0  := ((AutoSeq.Trunnion2To0 AND ModeMgr.AutoMode) OR (ManTrn20 AND ModeMgr.ManualMode)) AND SafetyOK,
+    To50 := ((AutoSeq.Trunnion2To50 AND ModeMgr.AutoMode) OR (ManTrn250 AND ModeMgr.ManualMode)) AND SafetyOK
+);
+
+
+//--------------------------------------------------
+// TURNTABLE CONTROL
+//--------------------------------------------------
+Turntable(
+    To180 := ((AutoSeq.Turn180 AND ModeMgr.AutoMode) OR (ManTT180 AND ModeMgr.ManualMode)) AND SafetyOK,
+    To0   := ((AutoSeq.TurnTo0 AND ModeMgr.AutoMode) OR (ManTT0 AND ModeMgr.ManualMode)) AND SafetyOK
+);
+
+
+//--------------------------------------------------
+// WELD ROBOT CONTROL
+//--------------------------------------------------
+Robot1(
+    StartWeld1 := ((AutoSeq.RobotWeldStart1 AND ModeMgr.AutoMode) OR (ManWeld1 AND ModeMgr.ManualMode)) AND SafetyOK,
+    StartWeld2 := ((AutoSeq.RobotWeldStart2 AND ModeMgr.AutoMode) OR (ManWeld2 AND ModeMgr.ManualMode)) AND SafetyOK
+);
+
+//--------------------------------------------------
+// MH ROBOT CONTROL
+//--------------------------------------------------
+Robot2(
+    ClearToPick1 := ((AutoSeq.RobotClearPick1 AND ModeMgr.AutoMode) OR (ManWeld1 AND ModeMgr.ManualMode)) AND SafetyOK,
+    ClearToPick2 := ((AutoSeq.RobotClearPick2 AND ModeMgr.AutoMode) OR (ManWeld2 AND ModeMgr.ManualMode)) AND SafetyOK
+);
+
+//--------------------------------------------------
+// AUTO SEQUENCE CONTROL (MAIN LOGIC)
+//--------------------------------------------------
+AutoSeq(
+    CycleStart    := CycleStart AND ModeMgr.AutoMode AND SafetyOK,
+
+    AutoMode      := ModeMgr.AutoMode,
+
+    PartPresent1  := IO.Fixture1Input.i_PART_CONTROL_B1 AND 
+					 IO.Fixture1Input.i_PART_CONTROL_B2 AND 
+					 IO.Fixture1Input.i_PART_CONTROL_B3 AND 
+ 					 IO.Fixture1Input.i_PART_CONTROL_B4 AND  
+				     IO.Fixture1Input.i_PART_CONTROL_B5 AND 
+             		 IO.Fixture1Input.i_PART_CONTROL_B6 AND 
+					 IO.Fixture1Input.i_PART_CONTROL_B7,
+					 
+    PartPresent2  := IO.Fixture1Input.i_PART_CONTROL_B8 AND 
+					 IO.Fixture1Input.i_PART_CONTROL_B9 AND 
+					 IO.Fixture1Input.i_PART_CONTROL_B10 AND 
+ 					 IO.Fixture1Input.i_PART_CONTROL_B11 AND  
+				     IO.Fixture1Input.i_PART_CONTROL_B12 AND 
+             		 IO.Fixture1Input.i_PART_CONTROL_B13 AND 
+					 IO.Fixture1Input.i_PART_CONTROL_B14,
+	
+	PartPresent3  := IO.Fixture2Input.i_PART_CONTROL_B1 AND 
+					 IO.Fixture2Input.i_PART_CONTROL_B2 AND 
+					 IO.Fixture2Input.i_PART_CONTROL_B3 AND 
+ 					 IO.Fixture2Input.i_PART_CONTROL_B4 AND  
+				     IO.Fixture2Input.i_PART_CONTROL_B5 AND 
+             		 IO.Fixture2Input.i_PART_CONTROL_B6 AND 
+					 IO.Fixture2Input.i_PART_CONTROL_B7,
+					 
+    PartPresent4  := IO.Fixture2Input.i_PART_CONTROL_B8 AND 
+					 IO.Fixture2Input.i_PART_CONTROL_B9 AND 
+					 IO.Fixture2Input.i_PART_CONTROL_B10 AND 
+ 					 IO.Fixture2Input.i_PART_CONTROL_B11 AND  
+				     IO.Fixture2Input.i_PART_CONTROL_B12 AND 
+             		 IO.Fixture2Input.i_PART_CONTROL_B13 AND 
+					 IO.Fixture2Input.i_PART_CONTROL_B14,
+
+    Fixture_1_CC1Done    := Fixture_1_CC1.Done,
+    Fixture_1_CC2Done    := Fixture_1_CC2.Done,
+    Fixture_1_CC3Done    := Fixture_1_CC3.Done,	
+	Fixture_1_CC4Done    := Fixture_1_CC4.Done,
+	Fixture_1_CC5Done    := Fixture_1_CC5.Done,
+	Fixture_1_CC6Done    := Fixture_1_CC6.Done,
+	
+    Fixture_2_CC1Done    := Fixture_2_CC1.Done,
+    Fixture_2_CC2Done    := Fixture_2_CC2.Done,
+    Fixture_2_CC3Done    := Fixture_2_CC3.Done,	
+	Fixture_2_CC4Done    := Fixture_2_CC4.Done,
+	Fixture_2_CC5Done    := Fixture_2_CC5.Done,
+	Fixture_2_CC6Done    := Fixture_2_CC6.Done,	
+	
+	RollerDoor1Done    := RollerDoor1.Done,
+    RollerDoor2Done    := RollerDoor2.Done,
+
+    TurntableAt0   := Turntable.At0,
+    TurntableAt180 := Turntable.At180,
+
+    WeldComplete1 := Robot1.WeldDone1,
+    WeldComplete2 := Robot1.WeldDone2,
+	
+	PickComplete1 := Robot2.Pick1Done1,
+    PickComplete2 := Robot2.Pick2Done2,
+
+    Trunnion1At0   := Trunnion1.At0,
+    Trunnion1At50  := Trunnion1.At50,
+	
+    Trunnion2At0   := Trunnion2.At0,
+    Trunnion2At50  := Trunnion2.At50	
+);
+
+    IO.Fixture1Input.i_PART_CONTROL_B1:=PartPresent1;
+	IO.Fixture1Input.i_PART_CONTROL_B2:=PartPresent1;
+	IO.Fixture1Input.i_PART_CONTROL_B3:=PartPresent1;
+ 	IO.Fixture1Input.i_PART_CONTROL_B4:=PartPresent1;
+	IO.Fixture1Input.i_PART_CONTROL_B5:=PartPresent1;
+    IO.Fixture1Input.i_PART_CONTROL_B6:=PartPresent1;
+	IO.Fixture1Input.i_PART_CONTROL_B7:=PartPresent1;
+					 
+    IO.Fixture1Input.i_PART_CONTROL_B8:=PartPresent2;
+	IO.Fixture1Input.i_PART_CONTROL_B9:=PartPresent2;
+	IO.Fixture1Input.i_PART_CONTROL_B10:=PartPresent2;
+ 	IO.Fixture1Input.i_PART_CONTROL_B11:=PartPresent2;
+	IO.Fixture1Input.i_PART_CONTROL_B12:=PartPresent2;
+    IO.Fixture1Input.i_PART_CONTROL_B13:=PartPresent2;
+	IO.Fixture1Input.i_PART_CONTROL_B14:=PartPresent2;
+	
+    IO.Fixture2Input.i_PART_CONTROL_B1:=PartPresent3;
+	IO.Fixture2Input.i_PART_CONTROL_B2:=PartPresent3;
+	IO.Fixture2Input.i_PART_CONTROL_B3:=PartPresent3;
+ 	IO.Fixture2Input.i_PART_CONTROL_B4:=PartPresent3;
+	IO.Fixture2Input.i_PART_CONTROL_B5:=PartPresent3;
+    IO.Fixture2Input.i_PART_CONTROL_B6:=PartPresent3;
+	IO.Fixture2Input.i_PART_CONTROL_B7:=PartPresent3;
+					 
+    IO.Fixture2Input.i_PART_CONTROL_B8:=PartPresent4;
+	IO.Fixture2Input.i_PART_CONTROL_B9:=PartPresent4;
+	IO.Fixture2Input.i_PART_CONTROL_B10:=PartPresent4;
+ 	IO.Fixture2Input.i_PART_CONTROL_B11:=PartPresent4;
+	IO.Fixture2Input.i_PART_CONTROL_B12:=PartPresent4;
+    IO.Fixture2Input.i_PART_CONTROL_B13:=PartPresent4;
+	IO.Fixture2Input.i_PART_CONTROL_B14:=PartPresent4;
+
+]]></ST>
+    </Implementation>
+    <LineIds Name="MAIN">
+      <LineId Id="7240" Count="35" />
+      <LineId Id="7485" Count="0" />
+      <LineId Id="7529" Count="1" />
+      <LineId Id="7276" Count="7" />
+      <LineId Id="7486" Count="0" />
+      <LineId Id="7531" Count="1" />
+      <LineId Id="7284" Count="7" />
+      <LineId Id="7487" Count="0" />
+      <LineId Id="7533" Count="1" />
+      <LineId Id="7292" Count="7" />
+      <LineId Id="7488" Count="0" />
+      <LineId Id="7539" Count="1" />
+      <LineId Id="7300" Count="7" />
+      <LineId Id="7489" Count="0" />
+      <LineId Id="7308" Count="8" />
+      <LineId Id="7490" Count="0" />
+      <LineId Id="7317" Count="8" />
+      <LineId Id="7535" Count="1" />
+      <LineId Id="7491" Count="0" />
+      <LineId Id="7326" Count="6" />
+      <LineId Id="7492" Count="0" />
+      <LineId Id="7537" Count="1" />
+      <LineId Id="7333" Count="8" />
+      <LineId Id="7528" Count="0" />
+      <LineId Id="7527" Count="0" />
+      <LineId Id="7493" Count="0" />
+      <LineId Id="7342" Count="6" />
+      <LineId Id="7525" Count="1" />
+      <LineId Id="7494" Count="0" />
+      <LineId Id="7349" Count="7" />
+      <LineId Id="7495" Count="0" />
+      <LineId Id="7357" Count="70" />
+      <LineId Id="7496" Count="5" />
+      <LineId Id="7508" Count="0" />
+      <LineId Id="7502" Count="5" />
+      <LineId Id="7428" Count="1" />
+      <LineId Id="7509" Count="5" />
+      <LineId Id="7430" Count="0" />
+      <LineId Id="7521" Count="0" />
+      <LineId Id="7515" Count="5" />
+      <LineId Id="7431" Count="33" />
+      <LineId Id="7541" Count="0" />
+      <LineId Id="7544" Count="7" />
+      <LineId Id="7574" Count="5" />
+      <LineId Id="7558" Count="1" />
+      <LineId Id="7581" Count="13" />
+      <LineId Id="7542" Count="1" />
+      <LineId Id="3594" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

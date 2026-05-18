@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.16">
+  <DUT Name="Fixture_Clamp" Id="{a6b44949-b5a6-4d37-a489-ec4c9aaf52fc}">
+    <Declaration><![CDATA[TYPE Fixture_Clamp :
+STRUCT	
+	CC1_CloseCmd      : BOOL;
+	CC1Done           : BOOL;
+    CC2_CloseCmd      : BOOL;
+	CC2Done           : BOOL;
+	CC3_CloseCmd      : BOOL;
+	CC3Done           : BOOL;
+    CC4_CloseCmd      : BOOL;
+	CC4Done           : BOOL;
+	CC5_CloseCmd      : BOOL;
+	CC5Done           : BOOL;
+    CC6_CloseCmd      : BOOL;
+	CC6Done           : BOOL;
+	
+    CC1_OpenCmd  : BOOL;
+    CC2_OpenCmd  : BOOL;
+    CC3_OpenCmd  : BOOL;
+    CC4_OpenCmd  : BOOL;
+    CC5_OpenCmd  : BOOL;
+    CC6_OpenCmd  : BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

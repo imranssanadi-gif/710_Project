@@ -1,0 +1,622 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.16">
+  <POU Name="FB_AutoSequence" Id="{959cf50e-f613-412f-b72d-3a4c81e618cb}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_AutoSequence
+VAR_INPUT
+    CycleStart     : BOOL;
+    AutoMode       : BOOL;
+
+    PartPresent1   : BOOL;
+    PartPresent2   : BOOL;
+	
+	PartPresent3   : BOOL;
+    PartPresent4   : BOOL;
+	
+
+	Fixture_1_CC1Done           : BOOL;
+	Fixture_1_CC2Done           : BOOL;
+	Fixture_1_CC3Done           : BOOL;
+	Fixture_1_CC4Done           : BOOL;
+	Fixture_1_CC5Done           : BOOL;
+	Fixture_1_CC6Done           : BOOL;
+	
+	Fixture_1_CC1_CloseCmd      : BOOL;
+    Fixture_1_CC2_CloseCmd      : BOOL;
+	Fixture_1_CC3_CloseCmd      : BOOL;
+    Fixture_1_CC4_CloseCmd      : BOOL;
+	Fixture_1_CC5_CloseCmd      : BOOL;
+    Fixture_1_CC6_CloseCmd      : BOOL;
+	
+    Fixture_1_CC1_OpenCmd  : BOOL;
+    Fixture_1_CC2_OpenCmd  : BOOL;
+    Fixture_1_CC3_OpenCmd  : BOOL;
+    Fixture_1_CC4_OpenCmd  : BOOL;
+    Fixture_1_CC5_OpenCmd  : BOOL;
+    Fixture_1_CC6_OpenCmd  : BOOL;
+	
+	Fixture_2_CC1Done           : BOOL;
+	Fixture_2_CC2Done           : BOOL;
+	Fixture_2_CC3Done           : BOOL;
+	Fixture_2_CC4Done           : BOOL;
+	Fixture_2_CC5Done           : BOOL;
+	Fixture_2_CC6Done           : BOOL;
+	
+	Fixture_2_CC1_CloseCmd      : BOOL;
+    Fixture_2_CC2_CloseCmd      : BOOL;
+	Fixture_2_CC3_CloseCmd      : BOOL;
+    Fixture_2_CC4_CloseCmd      : BOOL;
+	Fixture_2_CC5_CloseCmd      : BOOL;
+    Fixture_2_CC6_CloseCmd      : BOOL;
+	
+    Fixture_2_CC1_OpenCmd  : BOOL;
+    Fixture_2_CC2_OpenCmd  : BOOL;
+    Fixture_2_CC3_OpenCmd  : BOOL;
+    Fixture_2_CC4_OpenCmd  : BOOL;
+    Fixture_2_CC5_OpenCmd  : BOOL;
+    Fixture_2_CC6_OpenCmd  : BOOL;
+
+	RollerDoor1Done	   :BOOL;
+	RollerDoor2Done	   :BOOL;
+
+    TurntableAt0   : BOOL;
+    TurntableAt180 : BOOL;
+
+    WeldComplete1  : BOOL;
+    WeldComplete2  : BOOL;
+	
+    PickComplete1  : BOOL;
+    PickComplete2  : BOOL;
+
+    Trunnion1At0    : BOOL;
+    Trunnion1At50   : BOOL;
+	
+	Trunnion2At0    : BOOL;
+    Trunnion2At50   : BOOL;
+END_VAR
+
+VAR_OUTPUT
+    // Clamp commands
+	
+	// Door commands
+	RollerDoor1CloseCmd : BOOL;
+	RollerDoor1OpenCmd  : BOOL;
+	
+	RollerDoor2CloseCmd : BOOL;
+	RollerDoor2OpenCmd  : BOOL;
+	
+    // Motion commands
+    Trunnion1To0    : BOOL;
+    Trunnion1To50   : BOOL;
+
+    Trunnion2To0    : BOOL;
+    Trunnion2To50   : BOOL;
+	
+    Turn180        : BOOL;
+    TurnTo0        : BOOL;
+
+    // Robot commands
+    RobotWeldStart1    : BOOL;
+    RobotWeldStart2    : BOOL;
+	RobotClearPick1    : BOOL;
+    RobotClearPick2    : BOOL;
+END_VAR
+
+VAR
+    State1 : INT := 0;
+	State2 : INT := 0;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[//--------------------------------------------------
+// RESET OUTPUTS EVERY CYCLE
+//--------------------------------------------------
+Fixture_1_CC1_CloseCmd := FALSE;
+Fixture_1_CC2_CloseCmd := FALSE;
+Fixture_1_CC3_CloseCmd := FALSE;
+Fixture_1_CC4_CloseCmd := FALSE;
+Fixture_1_CC5_CloseCmd := FALSE;
+Fixture_1_CC6_CloseCmd := FALSE;
+
+Fixture_1_CC1_OpenCmd := FALSE;
+Fixture_1_CC2_OpenCmd := FALSE;
+Fixture_1_CC3_OpenCmd := FALSE;
+Fixture_1_CC4_OpenCmd := FALSE;
+Fixture_1_CC5_OpenCmd := FALSE;
+Fixture_1_CC6_OpenCmd := FALSE;
+
+Fixture_2_CC1_CloseCmd := FALSE;
+Fixture_2_CC2_CloseCmd := FALSE;
+Fixture_2_CC3_CloseCmd := FALSE;
+Fixture_2_CC4_CloseCmd := FALSE;
+Fixture_2_CC5_CloseCmd := FALSE;
+Fixture_2_CC6_CloseCmd := FALSE;
+
+Fixture_2_CC1_OpenCmd := FALSE;
+Fixture_2_CC2_OpenCmd := FALSE;
+Fixture_2_CC3_OpenCmd := FALSE;
+Fixture_2_CC4_OpenCmd := FALSE;
+Fixture_2_CC5_OpenCmd := FALSE;
+Fixture_2_CC6_OpenCmd := FALSE;
+
+RollerDoor1CloseCmd := FALSE;
+RollerDoor1OpenCmd  := FALSE;
+
+RollerDoor2CloseCmd := FALSE;
+RollerDoor2OpenCmd  := FALSE;
+
+Trunnion1To0 := FALSE;
+Trunnion1To50 := FALSE;
+Trunnion2To0 := FALSE;
+Trunnion2To50 := FALSE;
+
+Turn180 := FALSE;
+TurnTo0 := FALSE;
+
+RobotWeldStart1 := FALSE;
+RobotWeldStart2 := FALSE;
+RobotClearPick1 := FALSE;
+RobotClearPick2 := FALSE;
+
+//--------------------------------------------------
+// SEQUENCE LOGIC
+//--------------------------------------------------
+CASE State1 OF
+
+//--------------------------------------------------
+// 0: OPEN DOOR
+//--------------------------------------------------
+0:
+    IF TurntableAt0 AND NOT PartPresent1 THEN
+	RollerDoor1OpenCmd := TRUE;
+	END_IF
+
+    IF RollerDoor1Done AND TurntableAt0 AND NOT PartPresent1 THEN
+        State1 := 10;
+    END_IF
+	
+//--------------------------------------------------
+// 10: WAIT FOR START + PART 1
+//--------------------------------------------------
+10:
+    IF AutoMode AND CycleStart AND PartPresent1  THEN
+        State1 := 20;
+    END_IF
+	
+//--------------------------------------------------
+// 20: CLOSE DOOR
+//--------------------------------------------------
+20:
+    RollerDoor1CloseCmd := TRUE;
+
+    IF RollerDoor1Done THEN
+        State1 := 30;
+    END_IF
+
+//--------------------------------------------------
+// 30: CLOSE CLAMP CC1 CC3 CC5
+//--------------------------------------------------
+30:
+    Fixture_1_CC1_CloseCmd := TRUE;
+	Fixture_1_CC3_CloseCmd := TRUE;
+	Fixture_1_CC5_CloseCmd := TRUE;
+	
+
+    IF Fixture_1_CC1Done AND Fixture_1_CC3Done AND Fixture_1_CC5Done THEN
+        State1 := 40;
+    END_IF
+
+//--------------------------------------------------
+// 40: MOVE TRUNNION TO 50 DEG
+//--------------------------------------------------
+40:
+    Trunnion1To50 := TRUE;
+
+    IF Trunnion1At50 THEN
+        State1 := 50;
+    END_IF
+	
+//--------------------------------------------------
+// 50: OPEN DOOR
+//--------------------------------------------------
+50:
+    RollerDoor1OpenCmd := TRUE;
+
+    IF RollerDoor1Done THEN
+        State1 := 60;
+    END_IF
+
+
+//--------------------------------------------------
+// 60: WAIT FOR PART 2
+//--------------------------------------------------
+60:
+    IF PartPresent2 AND CycleStart AND Trunnion1At50 THEN
+        State1 := 70;
+    END_IF
+
+//--------------------------------------------------
+// 70: CLOSE CLAMP CC2 CC4 CC6
+//--------------------------------------------------
+70:
+    Fixture_1_CC2_CloseCmd := TRUE;
+	Fixture_1_CC4_CloseCmd := TRUE;
+	Fixture_1_CC6_CloseCmd := TRUE;
+
+    IF Fixture_1_CC2Done AND Fixture_1_CC4Done AND Fixture_1_CC6Done THEN
+        State1 := 80;
+    END_IF
+	
+//--------------------------------------------------
+// 80: CLOSE DOOR
+//--------------------------------------------------
+80:
+    RollerDoor1CloseCmd := TRUE;
+
+    IF RollerDoor1Done THEN
+        State1 := 90;
+    END_IF
+
+
+//--------------------------------------------------
+// 90: TRUNNION 1 BACK TO 0 DEG
+//--------------------------------------------------
+90:
+    Trunnion1To0 := TRUE;
+
+    IF Trunnion1At0 THEN
+        State1 := 100;
+    END_IF
+
+
+//--------------------------------------------------
+// 100: TURN TABLE TO 180 DEG (WELD STATION)
+//--------------------------------------------------
+100:
+	IF TurntableAt0 AND PartPresent1 AND PartPresent2 AND Trunnion1At0 THEN
+    Turn180 := TRUE;
+	END_IF
+	
+ 	IF TurntableAt180 THEN
+ 	State1 := 110;
+	END_IF
+	ELSE TurntableAt180:=FALSE;
+      
+//--------------------------------------------------
+// 110: ROBOT WELD 1
+//--------------------------------------------------
+110:
+    RobotWeldStart1 := TRUE;
+
+    IF WeldComplete1 THEN
+        State1 := 120;
+    END_IF
+	
+//--------------------------------------------------
+// 120: RETURN TRUNNION1 TO 50
+//--------------------------------------------------
+120:
+    Trunnion1To50 := TRUE;
+
+    IF Trunnion1At50 THEN
+        State1 := 130;
+    END_IF
+
+//--------------------------------------------------
+// 130: ROBOT WELD 2
+//--------------------------------------------------
+130:
+    RobotWeldStart2 := TRUE;
+
+    IF WeldComplete2 THEN
+        State1 := 140;
+    END_IF
+
+
+//--------------------------------------------------
+// 140: OPEN CLAMP CC1 CC3 CC5 
+//--------------------------------------------------
+140:
+	IF PartPresent2 AND TurntableAt180 AND Trunnion1At50 THEN
+    Fixture_1_CC1_OpenCmd := TRUE;
+	Fixture_1_CC3_OpenCmd := TRUE;
+	Fixture_1_CC5_OpenCmd := TRUE;
+	END_IF
+
+    IF Fixture_1_CC1Done AND Fixture_1_CC3Done AND Fixture_1_CC5Done  THEN
+        State1 := 150;
+    END_IF
+	
+//--------------------------------------------------
+// 150: ROBOT PICK 1
+//--------------------------------------------------
+150:
+    RobotClearPick1 := TRUE;
+
+    IF PickComplete1 THEN
+        State1 := 160;
+    END_IF	
+	
+//--------------------------------------------------
+// 160: RETURN TRUNNION TO 0
+//--------------------------------------------------
+160:
+    Trunnion1To0 := TRUE;
+
+    IF Trunnion1At0 THEN
+        State1 := 170;
+    END_IF
+	
+//--------------------------------------------------
+// 170: OPEN CLAMP CC2 CC4 CC6 
+//--------------------------------------------------
+170:
+	IF PartPresent1 AND TurntableAt180 AND Trunnion1At0 THEN
+    Fixture_1_CC2_OpenCmd := TRUE;
+	Fixture_1_CC4_OpenCmd := TRUE;
+	Fixture_1_CC6_OpenCmd := TRUE;
+	END_IF
+
+    IF Fixture_1_CC2Done AND Fixture_1_CC4Done AND Fixture_1_CC6Done THEN
+        State1 := 180;
+    END_IF
+	
+//--------------------------------------------------
+// 180: ROBOT PICK 2
+//--------------------------------------------------
+180:
+    RobotClearPick2 := TRUE;
+
+    IF PickComplete2 THEN
+        State1 := 0;
+    END_IF
+
+END_CASE
+
+
+
+//--------------------------------------------------
+// SEQUENCE LOGIC
+//--------------------------------------------------
+CASE State2 OF
+
+//--------------------------------------------------
+// 0: OPEN DOOR
+//--------------------------------------------------
+0:
+    IF TurntableAt180 AND NOT PartPresent3 THEN
+	RollerDoor1OpenCmd := TRUE;
+	END_IF
+
+    IF RollerDoor1Done AND TurntableAt180 AND NOT PartPresent3 THEN
+        State2 := 10;
+    END_IF
+
+
+//--------------------------------------------------
+// 10: WAIT FOR START + PART 3
+//--------------------------------------------------
+10:
+	IF AutoMode AND CycleStart AND PartPresent3  THEN
+        State2 := 20;
+    END_IF
+
+//--------------------------------------------------
+// 20: DOOR CLOSE
+//--------------------------------------------------
+20:
+	RollerDoor1CloseCmd := TRUE;
+
+    IF RollerDoor1Done THEN
+        State2 := 30;
+    END_IF
+	
+//--------------------------------------------------
+// 30: CLOSE CLAMP CC1 CC3 CC5
+//--------------------------------------------------
+30:
+    Fixture_2_CC1_CloseCmd := TRUE;
+	Fixture_2_CC3_CloseCmd := TRUE;
+	Fixture_2_CC5_CloseCmd := TRUE;
+
+    IF Fixture_2_CC1Done AND Fixture_2_CC3Done AND Fixture_2_CC5Done THEN
+        State2 := 40;
+    END_IF
+	
+	
+//--------------------------------------------------
+// 40: MOVE TRUNNION2 TO 50 DEG
+//--------------------------------------------------
+40:
+    Trunnion2To50 := TRUE;
+
+    IF Trunnion2At50 THEN
+        State2 := 50;
+    END_IF
+	
+//--------------------------------------------------
+// 50: OPEN DOOR
+//--------------------------------------------------
+50:
+	RollerDoor1OpenCmd := TRUE;
+
+    IF RollerDoor1Done THEN
+        State2 := 60;
+    END_IF	
+
+//--------------------------------------------------
+// 60: WAIT FOR PART 4
+//--------------------------------------------------
+60:
+    IF PartPresent4 AND CycleStart THEN
+        State2 := 70;
+    END_IF
+	
+//--------------------------------------------------
+// 70: DOOR CLOSE
+//--------------------------------------------------
+70:
+	RollerDoor1CloseCmd := TRUE;
+
+    IF RollerDoor1Done THEN
+       State2 := 80;
+    END_IF
+
+//--------------------------------------------------
+// 80: CLOSE CLAMP 4
+//--------------------------------------------------
+80:
+    Fixture_2_CC2_CloseCmd := TRUE;
+	Fixture_2_CC4_CloseCmd := TRUE;
+	Fixture_2_CC6_CloseCmd := TRUE;
+
+    IF Fixture_2_CC2Done AND Fixture_2_CC4Done AND Fixture_2_CC6Done THEN
+        State2 := 90;
+    END_IF
+	
+
+//--------------------------------------------------
+// 90: TRUNNION2 BACK TO 0 DEG
+//--------------------------------------------------
+90:
+    Trunnion2To0 := TRUE;
+
+    IF Trunnion2At0 THEN
+        State2 := 100;
+    END_IF
+
+
+//--------------------------------------------------
+// 100: TURN TABLE TO 0 DEG (WELD STATION)
+//--------------------------------------------------
+100:
+	IF TurntableAt180 AND NOT( PartPresent1 AND PartPresent2) AND PartPresent3 AND PartPresent4 THEN
+    TurnTo0 := TRUE;
+	END_IF
+	
+ 	IF TurntableAt0 THEN
+ 	State2 := 110;
+	END_IF
+	
+      
+//--------------------------------------------------
+// 110: ROBOT WELD 1
+//--------------------------------------------------
+110:
+    RobotWeldStart1 := TRUE;
+
+    IF WeldComplete1 THEN
+        State2 := 120;
+    END_IF
+	
+//--------------------------------------------------
+// 120: TRUNNION2 GO TO 50 DEG
+//--------------------------------------------------
+120:
+    Trunnion2To50 := TRUE;
+
+    IF Trunnion2At50 THEN
+        State2 := 130;
+    END_IF
+	
+//--------------------------------------------------
+// 130: ROBOT WELD 2
+//--------------------------------------------------
+130:
+    RobotWeldStart2 := TRUE;
+
+    IF WeldComplete2 THEN
+        State2 := 140;
+    END_IF
+	
+//--------------------------------------------------
+// 140: OPEN CLAMP 4
+//--------------------------------------------------
+140:
+	IF PartPresent4 AND TurntableAt0 AND Trunnion1At0 THEN
+    Fixture_2_CC2_OpenCmd := TRUE;
+	Fixture_2_CC4_OpenCmd := TRUE;
+	Fixture_2_CC6_OpenCmd := TRUE;
+	END_IF
+
+	IF Fixture_2_CC2Done AND Fixture_2_CC4Done AND Fixture_2_CC6Done  THEN
+		PartPresent4:=FALSE;
+        State2 := 150;
+    END_IF
+	
+//--------------------------------------------------
+// 150: ROBOT PICK 1
+//--------------------------------------------------
+150:
+    RobotClearPick1 := TRUE;
+
+    IF PickComplete1 THEN
+        State2 := 160;
+    END_IF		
+
+//--------------------------------------------------
+// 160: TRUNNION2 BACK TO 0 DEG
+//--------------------------------------------------
+160:
+    Trunnion2To0 := TRUE;
+
+    IF Trunnion2At0 THEN
+        State2 := 170;
+    END_IF
+	
+//--------------------------------------------------
+// 170: OPEN CLAMP 3
+//--------------------------------------------------
+170:
+	
+	IF PartPresent3 AND TurntableAt0 AND Trunnion1At0 THEN
+    Fixture_2_CC1_OpenCmd := TRUE;
+	Fixture_2_CC3_OpenCmd := TRUE;
+	Fixture_2_CC5_OpenCmd := TRUE;
+	END_IF
+
+    IF Fixture_2_CC1Done AND Fixture_2_CC3Done AND Fixture_2_CC5Done THEN
+		PartPresent3:=FALSE;
+        State2 := 180;
+    END_IF
+	
+//--------------------------------------------------
+// 180: ROBOT PICK 2
+//--------------------------------------------------
+180:
+    RobotClearPick2 := TRUE;
+
+    IF PickComplete2 THEN
+        State2 := 0;
+    END_IF
+END_CASE]]></ST>
+    </Implementation>
+    <LineIds Name="FB_AutoSequence">
+      <LineId Id="10797" Count="6" />
+      <LineId Id="11256" Count="1" />
+      <LineId Id="11245" Count="0" />
+      <LineId Id="10804" Count="3" />
+      <LineId Id="11258" Count="1" />
+      <LineId Id="11261" Count="12" />
+      <LineId Id="11260" Count="0" />
+      <LineId Id="10808" Count="59" />
+      <LineId Id="11247" Count="1" />
+      <LineId Id="11246" Count="0" />
+      <LineId Id="10868" Count="38" />
+      <LineId Id="11249" Count="1" />
+      <LineId Id="10907" Count="76" />
+      <LineId Id="11251" Count="1" />
+      <LineId Id="10984" Count="31" />
+      <LineId Id="11253" Count="1" />
+      <LineId Id="11016" Count="60" />
+      <LineId Id="11274" Count="1" />
+      <LineId Id="11077" Count="48" />
+      <LineId Id="11276" Count="1" />
+      <LineId Id="11126" Count="65" />
+      <LineId Id="11278" Count="1" />
+      <LineId Id="11192" Count="33" />
+      <LineId Id="11280" Count="1" />
+      <LineId Id="11226" Count="15" />
+      <LineId Id="1616" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

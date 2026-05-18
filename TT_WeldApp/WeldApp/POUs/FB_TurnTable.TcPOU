@@ -1,0 +1,85 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.16">
+  <POU Name="FB_TurnTable" Id="{a0ef821f-d5f8-44ac-af90-557d68b3b139}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Turntable
+VAR_INPUT
+    To180 : BOOL;
+    To0   : BOOL;
+END_VAR
+
+VAR_OUTPUT
+    Cmd180 : BOOL;
+    Cmd0   : BOOL;
+    Busy   : BOOL;
+    At0    : BOOL;
+    At180  : BOOL;
+END_VAR
+
+VAR
+    State : INT := 0;
+    tMove : TON;
+END_VAR
+
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+CASE State OF
+
+0:
+    Busy := FALSE;
+    Cmd180 := FALSE;
+    Cmd0 := FALSE;
+
+    At0 := TRUE;
+    At180 := FALSE;
+
+    tMove(IN := FALSE);
+
+    IF To180 THEN State := 10;
+    END_IF
+
+10:
+    Busy := TRUE;
+    Cmd180 := TRUE;
+    At0 := FALSE;
+
+    tMove(IN := TRUE, PT := T#10s);
+
+    IF tMove.Q THEN
+        Cmd180 := FALSE;
+        Busy := FALSE;
+        At180 := TRUE;
+        tMove(IN := FALSE);
+        State := 20;
+    END_IF
+
+20:
+    At180 := TRUE;
+
+    IF To0 THEN State := 30;
+    END_IF
+
+30:
+    Busy := TRUE;
+    Cmd0 := TRUE;
+    At180 := FALSE;
+
+    tMove(IN := TRUE, PT := T#10s);
+
+    IF tMove.Q THEN
+        Cmd0 := FALSE;
+        Busy := FALSE;
+        At0 := TRUE;
+        tMove(IN := FALSE);
+        State := 0;
+    END_IF
+
+END_CASE]]></ST>
+    </Implementation>
+    <LineIds Name="FB_TurnTable">
+      <LineId Id="476" Count="1" />
+      <LineId Id="408" Count="49" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

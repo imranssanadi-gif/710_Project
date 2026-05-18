@@ -1,0 +1,85 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.16">
+  <POU Name="FB_Clamp" Id="{01c6bab1-e861-4509-95a4-f7cdc5b69a40}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Clamp
+VAR_INPUT
+    CloseCmd   : BOOL;
+    OpenCmd    : BOOL;
+END_VAR
+
+VAR_OUTPUT
+    CloseOut   : BOOL;
+    OpenOut    : BOOL;
+    Done       : BOOL;
+    Busy       : BOOL;
+    ClosedSim  : BOOL;
+    OpenedSim  : BOOL;
+END_VAR
+
+VAR
+    State   : INT := 0;
+    tClose  : TON;
+    tOpen   : TON;
+END_VAR
+
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[CASE State OF
+
+0: // Idle
+    Done := FALSE;
+    Busy := FALSE;
+    CloseOut := FALSE;
+    OpenOut := FALSE;
+
+    tClose(IN := FALSE);
+    tOpen(IN := FALSE);
+
+    IF CloseCmd THEN
+        State := 10;
+    ELSIF OpenCmd THEN
+        State := 20;
+    END_IF
+
+
+10: // Closing
+    Busy := TRUE;
+    CloseOut := TRUE;
+
+    tClose(IN := TRUE, PT := T#3s);
+
+    IF tClose.Q THEN
+        CloseOut := FALSE;
+        Busy := FALSE;
+        Done := TRUE;
+        ClosedSim := TRUE;
+        OpenedSim := FALSE;
+        tClose(IN := FALSE);
+        State := 0;
+    END_IF
+
+
+20: // Opening
+    Busy := TRUE;
+    OpenOut := TRUE;
+
+    tOpen(IN := TRUE, PT := T#3s);
+
+    IF tOpen.Q THEN
+        OpenOut := FALSE;
+        Busy := FALSE;
+        Done := TRUE;
+        OpenedSim := TRUE;
+        ClosedSim := FALSE;
+        tOpen(IN := FALSE);
+        State := 0;
+    END_IF
+
+END_CASE]]></ST>
+    </Implementation>
+    <LineIds Name="FB_Clamp">
+      <LineId Id="85" Count="50" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

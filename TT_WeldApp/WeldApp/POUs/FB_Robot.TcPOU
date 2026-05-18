@@ -1,0 +1,109 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.16">
+  <POU Name="FB_Robot" Id="{a26cc3b1-c69d-4f69-b0f0-37bc5fdc1da6}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Robot
+VAR_INPUT
+    StartWeld1 : BOOL;
+    StartWeld2 : BOOL;
+END_VAR
+
+VAR_OUTPUT
+    Weld1Active : BOOL;
+    Weld2Active : BOOL;
+    Busy        : BOOL;
+    WeldDone1   : BOOL;
+    WeldDone2   : BOOL;
+END_VAR
+
+VAR
+    State   : INT := 0;
+    tWeld   : TON;
+
+    rTrig1  : R_TRIG;   // Rising edge for Weld1
+    rTrig2  : R_TRIG;   // Rising edge for Weld2
+END_VAR
+
+
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+// Edge detection (prevents continuous retrigger)
+rTrig1(CLK := StartWeld1);
+rTrig2(CLK := StartWeld2);
+
+
+CASE State OF
+
+//--------------------------------------------------
+// 0: IDLE
+//--------------------------------------------------
+0:
+    Busy := FALSE;
+
+    Weld1Active := FALSE;
+    Weld2Active := FALSE;
+
+    WeldDone1 := FALSE;
+    WeldDone2 := FALSE;
+
+    tWeld(IN := FALSE);
+
+    // Start only on rising edge
+    IF rTrig1.Q THEN
+        State := 10;
+    ELSIF rTrig2.Q THEN
+        State := 20;
+    END_IF
+
+
+//--------------------------------------------------
+// 10: WELD 1
+//--------------------------------------------------
+10:
+    Busy := TRUE;
+    Weld1Active := TRUE;
+
+    tWeld(IN := TRUE, PT := T#6s);
+
+    IF tWeld.Q THEN
+        Weld1Active := FALSE;
+        WeldDone1 := TRUE;
+
+        Busy := FALSE;
+        tWeld(IN := FALSE);
+
+        State := 0;
+    END_IF
+
+
+//--------------------------------------------------
+// 20: WELD 2
+//--------------------------------------------------
+20:
+    Busy := TRUE;
+    Weld2Active := TRUE;
+
+    tWeld(IN := TRUE, PT := T#6s);
+
+    IF tWeld.Q THEN
+        Weld2Active := FALSE;
+        WeldDone2 := TRUE;
+
+        Busy := FALSE;
+        tWeld(IN := FALSE);
+
+        State := 0;
+    END_IF
+
+END_CASE]]></ST>
+    </Implementation>
+    <LineIds Name="FB_Robot">
+      <LineId Id="114" Count="0" />
+      <LineId Id="207" Count="1" />
+      <LineId Id="205" Count="1" />
+      <LineId Id="115" Count="0" />
+      <LineId Id="117" Count="62" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
