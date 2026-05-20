@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.16">
+  <GVL Name="IO_1" Id="{d33c385b-972c-4192-9b5b-190b0cd51b4b}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+	Fixture1Input:FixtureInput;
+	Fixture1Output:FixtureOutput;
+	Fixture2Input:FixtureInput;
+	Fixture2Output:FixtureOutput;
+END_VAR
+
+]]></Declaration>
+  </GVL>
+</TcPlcObject>
